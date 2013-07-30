@@ -1,0 +1,74 @@
+//Custom string cleaning functions
+String.prototype.killWhiteSpace = function() {
+    return this.replace(/\s/g, '');
+};
+
+
+$(document).ready(function(){
+	$('#taskmenu').hide();
+	$('#taskpanel').hide();
+});
+
+var RootRef = new Firebase('https://2do.firebaseIO.com/');
+var GroupRef;
+var groupname;
+
+$('#creategroup').click(function(){
+	//Uploading necessary data to FireBase
+	var groupname_space = $('#groupnametext').val(); 
+	//var groupname = groupname-space.replace(' ', '_');
+	groupname = groupname_space.killWhiteSpace();
+	var username = $('#nickname').val();
+	RootRef.child(groupname).set(groupname);
+	GroupRef = new Firebase('https://2do.firebaseIO.com/'+groupname);
+	console.log(GroupRef);
+	GroupRef.child('users').set('users');
+	console.log('Second Level achieved!');
+	var UserRef = new Firebase(GroupRef+'/users');
+	UserRef.child(username).set('username');
+
+	//Revealing and hiding selected elements on page
+	$('#groupselect').hide('slow');
+	$('#taskmenu').show('slow');
+	$('#taskpanel').show('slow');
+});
+
+
+
+$('#send').click(function(){
+	console.log(groupname);
+
+	console.log(GroupRef);
+
+	//var pushedRef = GroupRef.push();
+	//pushedRef.set({task: $('#task').val()});
+	//var pushedName = pushedRef.name();
+
+	var taskVal = $('#task').val();
+
+	console.log(taskVal);
+
+	GroupRef.child('tasks').set('tasks');
+	TaskRef = new Firebase(GroupRef+'/tasks');	
+	TaskRef.child('task').set($('#task').val());
+
+	//var dataRef = new Firebase('https://2do.firebaseIO.com/'+groupname+'/'+pushedName+'/task');	
+
+	//console.log(dataRef);
+
+	var dataRef = new Firebase(TaskRef+'/'+taskVal);
+
+	
+	dataRef.on('value', function(snapshot) {
+	      	qprint(snapshot.val());
+	});
+	
+});	
+
+
+function qprint(data){
+	var li = '<h3><li class="list-group-item">';
+	$("#tasklist").append(li+data+'</li></h3>');
+}
+
+
